@@ -5,12 +5,27 @@ class Program{
     static void Main(string[] args)
     {
         var array = GenerateArray(Int32.Parse(args[0]));
-        //PrintList(array);
-        var watch = new Stopwatch();
-        watch.Start();
-        var sum = new ComputeNoThreads{ WeirdArray = array }.Compute();
-        watch.Stop();
-        Console.WriteLine("Suma este: " + sum + "\n" + "Duration: " + Math.Round(watch.ElapsedMilliseconds/1000f, 2) + "s");
+        var threadsNumber = Int32.Parse(args[1]);
+
+        var watch1 = new Stopwatch();
+        var watch2 = new Stopwatch();
+
+
+
+        //No threads 
+        watch1.Start();
+        var sumNoThreads = new ComputeNoThreads{ WeirdArray = array }.Compute();
+        watch1.Stop();
+        Console.WriteLine("[NoThreads] Suma este: " + sumNoThreads + "\n" + "Duration: " + Math.Round(watch1.ElapsedMilliseconds/1000f, 2) + "s");
+
+        //With threads - v1
+        watch2.Start();
+        var sumWithThreads = new ComputeWithThreads{ WeirdArray = array, ThreadsNumber = threadsNumber }.Compute();
+        watch2.Stop();
+        Console.WriteLine("[WithThreads] Suma este: " + sumWithThreads + "\n" + "Duration: " + Math.Round(watch2.ElapsedMilliseconds/1000f, 2) + "s");
+
+        //n threads care calculeaza produse pe chunks din list<tuple>
+        //fiecare thread scrie chunk de produse in list arr1 pe care il creezi in Compute()
     }
 
     static void PrintList(List<(int, int)> list)
