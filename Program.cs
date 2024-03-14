@@ -4,30 +4,66 @@ using System.Diagnostics;
 class Program{
     static void Main(string[] args)
     {
-        var array = GenerateArray(Int32.Parse(args[0]));
-        var threadsNumber = Int32.Parse(args[1]);
+        var array = GenerateArray(int.Parse(args[0]));
+        var threadsNumber = int.Parse(args[1]);
+        var threadsMethod = args[2];
+        var sum = 0;
 
-        var watch1 = new Stopwatch();
-        var watch2 = new Stopwatch();
+        // Console.WriteLine(threadsMethod);
+        // Console.WriteLine(threadsMethod is string);
+        // return;
+        var watch = new Stopwatch();
 
+        switch(args[2])
+        {
+            case "no_threads": 
+                threadsNumber = 1;
+                watch.Start();
+                sum = new ComputeNoThreads {WeirdArray = array}.Compute();
+                watch.Stop();
+                break;
+            case "threads_v1":
+                watch.Start();
+                sum = new ComputeWithThreads {WeirdArray = array, ThreadsNumber = threadsNumber}.Compute();
+                watch.Stop();
+                break;
+            case "threads_v2":
+                watch.Start();
+                sum = new ComputeWithThreadsV2 {WeirdArray = array, ThreadsNumber = threadsNumber}.Compute();
+                watch.Stop();
+                break;
+            default:
+                Console.WriteLine("Invalid argument provided");
+                sum = -1;
+                break;
+        }
 
+        if(sum == -1)
+            return; 
 
-        //No threads 
-        watch1.Start();
-        var sumNoThreads = new ComputeNoThreads{ WeirdArray = array }.Compute();
-        watch1.Stop();
-        Console.WriteLine("[NoThreads] Suma este: " + sumNoThreads + "\n" + "Duration: " + Math.Round(watch1.ElapsedMilliseconds/1000f, 2) + "s");
-
-        //With threads - v1
-        watch2.Start();
-        var sumWithThreads = new ComputeWithThreads{ WeirdArray = array, ThreadsNumber = threadsNumber }.Compute();
-        watch2.Stop();
-        Console.WriteLine("[WithThreads] Suma este: " + sumWithThreads + "\n" + "Duration: " + Math.Round(watch2.ElapsedMilliseconds/1000f, 2) + "s");
-
-        //n threads care calculeaza produse pe chunks din list<tuple>
-        //fiecare thread scrie chunk de produse in list arr1 pe care il creezi in Compute()
+        var result = new ExecutionResult 
+        { 
+            Method = threadsMethod, 
+            Duration = Math.Round(watch.ElapsedMilliseconds / 1000f, 2), 
+            ArraySize = array.Count, 
+            ThreadsNumber = threadsNumber, 
+            TotalSum = sum 
+        };
+    
+        SaveResultsToCSV("thread-results.csv", result);
     }
 
+    static void SaveResultsToCSV(string filePath, ExecutionResult result)
+    {
+        using (var writer = new StreamWriter(filePath, true))
+        {
+            if (writer.BaseStream.Length == 0)
+                writer.WriteLine("Method,Duration(s),ArraySize,ThreadsNumber,TotalSum");
+
+            writer.WriteLine($"{result.Method},{result.Duration},{result.ArraySize},{result.ThreadsNumber},{result.TotalSum}");
+   
+        }
+    }
     static void PrintList(List<(int, int)> list)
     {
         for (int i = 0; i < list.Count(); i++){
@@ -60,6 +96,14 @@ class Program{
     }
 }
 
+class ExecutionResult
+{
+    public string Method {get; set;}
+    public double Duration  {get; set;}
+    public int ArraySize {get; set;}
+    public int ThreadsNumber {get; set;}
+    public int TotalSum {get; set;}
+}
 
 
 

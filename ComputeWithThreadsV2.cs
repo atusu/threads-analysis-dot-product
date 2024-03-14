@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-public class ComputeWithThreads
+public class ComputeWithThreadsV2
 {
     public List<(int, int)> WeirdArray {get; set;}
     public int ThreadsNumber {get; set;}
@@ -15,42 +15,40 @@ public class ComputeWithThreads
         
         int totalSum = 0;
 
-        var partialSums = new List<int>();
+        var products = new List<int>();
 
         for(int i = 0; i < numberOfThreads; i++){
             var start = i * workPerThread;
             var end = (i == numberOfThreads - 1) ? WeirdArray.Count : (i + 1) * workPerThread;
 
-            Thread thread = new Thread(new ParameterizedThreadStart(ComputePartialSums));
+            Thread thread = new Thread(new ParameterizedThreadStart(ComputeProducts));
             
-            var param = Tuple.Create(WeirdArray, start, end, partialSums);
+            var param = Tuple.Create(WeirdArray, start, end, products);
             thread.Start(param);
             thread.Join();
         }
 
-        foreach (var partialSum in partialSums)
+        foreach (var product in products)
         {
-            totalSum += partialSum;
+            totalSum += product;
         }
-        
+
         return totalSum;
     }
 
-    public void ComputePartialSums(object data)
+    public void ComputeProducts(object data)
     {
         var parameters = (Tuple<List<(int, int)>, int, int, List<int>>) data;
         var arr = parameters.Item1;
         int start = parameters.Item2;
         int end = parameters.Item3;
-        List<int> partialSums = parameters.Item4;
+        List<int> products = parameters.Item4;
 
         int partialSum = 0;
 
         for (int i = start; i < end; i++)
         {
-            partialSum += arr[i].Item1 * arr[i].Item2;
-        }
-
-        partialSums.Add(partialSum);        
+            products.Add(arr[i].Item1 * arr[i].Item2);
+        }       
     }
 }
