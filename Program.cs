@@ -39,7 +39,7 @@ class Program{
             TotalSum = sum 
         };
     
-        SaveResultsToCSV("results_v2.csv", result);
+        SaveResultsToCSV("thread-results.csv", result);
     }
 
     static void SaveResultsToCSV(string filePath, ExecutionResult result)
