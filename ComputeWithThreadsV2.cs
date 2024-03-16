@@ -15,7 +15,7 @@ public class ComputeWithThreadsV2
         
         int totalSum = 0;
 
-        var products = new List<int>();
+        var products = new int[WeirdArray.Count].ToList();
 
         for(int i = 0; i < numberOfThreads; i++){
             var start = i * workPerThread;
@@ -25,6 +25,10 @@ public class ComputeWithThreadsV2
             
             var param = Tuple.Create(WeirdArray, start, end, products);
             thread.Start(param);
+            threads.Add(thread);
+        }
+
+        foreach (var thread in threads) {
             thread.Join();
         }
 
@@ -44,11 +48,9 @@ public class ComputeWithThreadsV2
         int end = parameters.Item3;
         List<int> products = parameters.Item4;
 
-        int partialSum = 0;
-
         for (int i = start; i < end; i++)
         {
-            products.Add(arr[i].Item1 * arr[i].Item2);
+            products[i] = arr[i].Item1 * arr[i].Item2;
         }       
     }
 }

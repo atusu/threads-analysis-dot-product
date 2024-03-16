@@ -15,21 +15,23 @@ public class ComputeWithThreads
         
         int totalSum = 0;
 
-        var partialSums = new List<int>();
+        var partialSums = new int[numberOfThreads].ToList();
 
         for(int i = 0; i < numberOfThreads; i++){
             var start = i * workPerThread;
             var end = (i == numberOfThreads - 1) ? WeirdArray.Count : (i + 1) * workPerThread;
 
-            Thread thread = new Thread(new ParameterizedThreadStart(ComputePartialSums));
+            threads.Add(new Thread(new ParameterizedThreadStart(ComputePartialSums)));
             
-            var param = Tuple.Create(WeirdArray, start, end, partialSums);
-            thread.Start(param);
-            thread.Join();
+            var param = Tuple.Create(WeirdArray, start, end, partialSums, i);
+            threads[i].Start(param);
         }
 
-        foreach (var partialSum in partialSums)
-        {
+        for(int i = 0; i < numberOfThreads; i++) {
+            threads[i].Join();
+        }
+
+        foreach(var partialSum in partialSums) {
             totalSum += partialSum;
         }
         
@@ -38,11 +40,13 @@ public class ComputeWithThreads
 
     public void ComputePartialSums(object data)
     {
-        var parameters = (Tuple<List<(int, int)>, int, int, List<int>>) data;
+        var parameters = (Tuple<List<(int, int)>, int, int, List<int>, int>) data;
         var arr = parameters.Item1;
         int start = parameters.Item2;
         int end = parameters.Item3;
-        List<int> partialSums = parameters.Item4;
+        var partialSums = parameters.Item4;
+        int threadIx = parameters.Item5;
+        //System.Console.WriteLine($"started {threadIx}");
 
         int partialSum = 0;
 
@@ -51,6 +55,8 @@ public class ComputeWithThreads
             partialSum += arr[i].Item1 * arr[i].Item2;
         }
 
-        partialSums.Add(partialSum);        
+        partialSums[threadIx] = partialSum;
+        // partialSums.Add(partialSum);
+        // System.Console.WriteLine($"ended {threadIx}");
     }
 }

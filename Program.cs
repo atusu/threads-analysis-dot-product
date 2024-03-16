@@ -8,49 +8,38 @@ class Program{
         var threadsNumber = int.Parse(args[1]);
         var threadsMethod = args[2];
         var sum = 0;
-
-        // Console.WriteLine(threadsMethod);
-        // Console.WriteLine(threadsMethod is string);
-        // return;
         var watch = new Stopwatch();
 
+        watch.Start();
         switch(args[2])
         {
             case "no_threads": 
                 threadsNumber = 1;
-                watch.Start();
                 sum = new ComputeNoThreads {WeirdArray = array}.Compute();
-                watch.Stop();
                 break;
             case "threads_v1":
-                watch.Start();
                 sum = new ComputeWithThreads {WeirdArray = array, ThreadsNumber = threadsNumber}.Compute();
-                watch.Stop();
                 break;
             case "threads_v2":
-                watch.Start();
                 sum = new ComputeWithThreadsV2 {WeirdArray = array, ThreadsNumber = threadsNumber}.Compute();
-                watch.Stop();
                 break;
             default:
                 Console.WriteLine("Invalid argument provided");
                 sum = -1;
-                break;
+                return;
         }
-
-        if(sum == -1)
-            return; 
+        watch.Stop();
 
         var result = new ExecutionResult 
         { 
             Method = threadsMethod, 
-            Duration = Math.Round(watch.ElapsedMilliseconds / 1000f, 2), 
+            Duration = Math.Round(watch.ElapsedMilliseconds / 1000f, 5), 
             ArraySize = array.Count, 
             ThreadsNumber = threadsNumber, 
             TotalSum = sum 
         };
     
-        SaveResultsToCSV("thread-results.csv", result);
+        SaveResultsToCSV("results_v2.csv", result);
     }
 
     static void SaveResultsToCSV(string filePath, ExecutionResult result)
